@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  if (session) {
-    router.replace("/tasks");
-    return null;
-  }
+  useEffect(() => {
+    if (session) router.replace("/tasks");
+  }, [session, router]);
+
+  if (session) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
