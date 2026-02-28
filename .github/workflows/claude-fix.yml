@@ -1,0 +1,56 @@
+name: Auto-Fix
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Capture build errors
+        run: |
+          pnpm lint 2>&1 | tee /tmp/build-output.txt; true
+          pnpm build 2>&1 | tee -a /tmp/build-output.txt; true
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Run Claude to fix errors
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_BASE_URL: https://adesso-ai-hub.3asabc.de
+        run: |
+          BUILD_ERRORS=$(cat /tmp/build-output.txt)
+          claude -p "The CI build failed with these errors:
+
+          ${BUILD_ERRORS}
+
+          Fix all TypeScript and ESLint errors in this Next.js repository.
+          After fixing, run pnpm build to verify the fix works." \
+            --model claude-sonnet-4-6 --max-turns 10 \
+            --allowedTools "Edit,Read,Bash,Write,Glob,Grep"
+      - name: Commit and push fix
+        run: |
+          git config user.name "claude-auto-fix[bot]"
+          git config user.email "claude-auto-fix[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git add -A
+          git commit -m "fix: auto-fix build/lint errors via Claude
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+          git push
