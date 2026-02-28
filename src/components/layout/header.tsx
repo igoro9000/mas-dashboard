@@ -7,6 +7,7 @@ import Link from "next/link";
 const titles: Record<string, string> = {
   "/tasks": "Tasks",
   "/new-task": "New Task",
+  "/chat": "Chat",
   "/agents": "Agents",
   "/settings": "Settings",
   "/login": "Sign In",

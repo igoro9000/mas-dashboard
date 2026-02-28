@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ListTodo, PlusCircle, Bot, Settings } from "lucide-react";
+import { ListTodo, PlusCircle, MessageSquare, Bot, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/new-task", label: "New", icon: PlusCircle },
+  { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/agents", label: "Agents", icon: Bot },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
