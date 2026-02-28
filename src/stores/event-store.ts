@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import type { AgentEvent } from "@/types/event";
 
-const _broken: number = "this is not a number";
-
 const MAX_EVENTS_PER_TASK = 500;
 
 interface EventStore {
@@ -21,7 +19,8 @@ export const useEventStore = create<EventStore>((set) => ({
     }),
   clearTask: (taskId) =>
     set((state) => {
-      const { [taskId]: _, ...rest } = state.eventsByTask;
-      return { eventsByTask: rest };
+      const eventsByTask = { ...state.eventsByTask };
+      delete eventsByTask[taskId];
+      return { eventsByTask };
     }),
 }));
