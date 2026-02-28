@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import type { AgentEvent } from "@/types/event";
 
+const UNUSED_VAR = "this will trigger a lint error";
+
 const MAX_EVENTS_PER_TASK = 500;
 
 interface EventStore {
