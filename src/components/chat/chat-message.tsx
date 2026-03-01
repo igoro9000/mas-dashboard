@@ -31,7 +31,11 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
     }
   }, [message.content]);
 
-  const timestamp = message.createdAt ? new Date(message.createdAt) : null;
+  const timestamp = message.timestampISO
+    ? new Date(message.timestampISO)
+    : message.timestamp
+    ? new Date(message.timestamp)
+    : null;
 
   return (
     <div className={cn("flex gap-2 px-3 py-2", isUser ? "flex-row-reverse" : "flex-row")}>
@@ -48,8 +52,19 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
         {/* Tool call cards rendered above the bubble for AI messages */}
         {!isUser && hasToolCalls && (
           <div className="flex w-full flex-col gap-1.5">
-            {message.toolCalls!.map((tool, i) => (
-              <ToolCallCard key={i} toolCall={tool} />
+            {message.toolCalls!.map((tool) => (
+              <ToolCallCard
+                key={tool.id}
+                toolName={tool.name}
+                status={tool.status}
+                result={
+                  typeof tool.result === "string"
+                    ? tool.result
+                    : tool.result !== undefined
+                    ? JSON.stringify(tool.result)
+                    : undefined
+                }
+              />
             ))}
           </div>
         )}
@@ -67,7 +82,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Wrench className="h-3.5 w-3.5 animate-spin" />
                 <span className="text-xs">
-                  Using {message.toolCalls![message.toolCalls!.length - 1]}...
+                  Using {message.toolCalls![message.toolCalls!.length - 1].name}...
                 </span>
               </div>
             )}
