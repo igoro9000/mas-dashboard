@@ -12,6 +12,8 @@ export function ChatView() {
   const { messages, isStreaming, send, stop, clear } = useChat();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+  const wasStreamingRef = useRef(false);
   const { keyboardHeight, isKeyboardOpen, isMobile } = useVirtualKeyboard();
 
   // Hide message list on mobile while keyboard is open — keeps only input visible
@@ -23,6 +25,17 @@ export function ChatView() {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isStreaming, hideMessages]);
+
+  // Focus the last assistant message as soon as streaming finishes
+  useEffect(() => {
+    if (isStreaming) {
+      wasStreamingRef.current = true;
+      return;
+    }
+    if (!wasStreamingRef.current) return;
+    wasStreamingRef.current = false;
+    lastMessageRef.current?.focus();
+  }, [isStreaming]);
 
   const handleSend = async (content: string) => {
     await send(content);
@@ -70,12 +83,18 @@ export function ChatView() {
             </div>
           ) : (
             <div className="py-2">
-              {messages.map((msg) => (
-                <ChatMessageBubble
+              {messages.map((msg, idx) => (
+                <div
                   key={msg.id}
-                  message={msg}
-                  isStreaming={isStreaming && msg.id === lastMessage?.id}
-                />
+                  ref={idx === messages.length - 1 && msg.role === "assistant" ? lastMessageRef : undefined}
+                  tabIndex={-1}
+                  className="outline-none"
+                >
+                  <ChatMessageBubble
+                    message={msg}
+                    isStreaming={isStreaming && msg.id === lastMessage?.id}
+                  />
+                </div>
               ))}
 
               {/* Typing indicator: show when streaming and last message is not yet from assistant */}
