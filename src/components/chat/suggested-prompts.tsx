@@ -1,5 +1,3 @@
-import React from "react";
-
 const SUGGESTED_PROMPTS = [
   "What tasks are currently running?",
   "Show me recent errors",
