@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import type { AgentStatus } from "@/types/agent";
 import type { AgentName } from "@/types/event";
 import { cn } from "@/lib/utils";
-import { Bot, Code, Search, Bug, GitMerge, CheckCircle2, XCircle } from "lucide-react";
+import { Bot, Code, Search, GitMerge, CheckCircle2, XCircle } from "lucide-react";
 
 const agentConfig: Record<AgentName, { icon: typeof Bot; color: string; bg: string }> = {
   planner: { icon: Bot, color: "text-blue-500", bg: "bg-blue-500/10" },
   coder: { icon: Code, color: "text-violet-500", bg: "bg-violet-500/10" },
   reviewer: { icon: Search, color: "text-amber-500", bg: "bg-amber-500/10" },
-  debugger: { icon: Bug, color: "text-orange-500", bg: "bg-orange-500/10" },
 };
 
 export function AgentCard({ agent, onMerge }: { agent: AgentStatus; onMerge?: () => void }) {
