@@ -5,7 +5,7 @@ import { User, Bot, Wrench, Clipboard, Check } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import type { ChatMessage } from "@/types/chat";
 import { cn } from "@/lib/utils";
-import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { MarkdownRenderer } from "@/components/chat/markdown-renderer";
 import { ToolCallCard } from "@/components/chat/tool-call-card";
 import { TypingCursor } from "@/components/chat/typing-cursor";
 
@@ -31,11 +31,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
     }
   }, [message.content]);
 
-  const timestamp = message.timestampISO
-    ? new Date(message.timestampISO)
-    : message.timestamp
-    ? new Date(message.timestamp)
-    : null;
+  const timestamp = message.timestamp ? new Date(message.timestamp) : null;
 
   return (
     <div className={cn("flex gap-2 px-3 py-2", isUser ? "flex-row-reverse" : "flex-row")}>
