@@ -34,7 +34,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
   const timestamp = message.timestamp ? new Date(message.timestamp) : null;
 
   return (
-    <div className={cn("flex flex-col px-3 py-2", isUser ? "items-end" : "items-start")}>
+    <div className={cn("flex flex-col px-3 py-2 w-full", isUser ? "items-end" : "items-start")}>
       <div className={cn("flex flex-col gap-1", isUser ? "max-w-[85%] items-end" : "w-full items-start")}>
         {/* Tool call cards rendered above the bubble for assistant messages */}
         {!isUser && hasToolCalls && (
