@@ -2,10 +2,14 @@ import type { AgentName } from "./event";
 
 export interface AgentStatus {
   name: AgentName;
+  agentType?: string;
   waiting: number;
   active: number;
   completed: number;
   failed: number;
+  mergeStatus?: "merged" | "failed";
+  awaitingMerge?: boolean;
+  actionState?: string | null;
 }
 
 export type AgentActionType =
