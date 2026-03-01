@@ -5,15 +5,12 @@ import { useAuth } from "./auth-provider";
 import { getSocket, destroySocket } from "@/lib/socket";
 import { useEventStore } from "@/stores/event-store";
 import type { AgentEvent } from "@/types/event";
-import type { AppSocket } from "@/lib/socket";
 
 interface SocketContextValue {
-  socket: AppSocket | null;
   isConnected: boolean;
 }
 
 const SocketContext = createContext<SocketContextValue>({
-  socket: null,
   isConnected: false,
 });
 
@@ -24,7 +21,7 @@ export function useSocket() {
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { session } = useAuth();
   const addEvent = useEventStore((s) => s.addEvent);
-  const socketRef = useRef<AppSocket | null>(null);
+  const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -47,10 +44,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     socketInstance.connect();
 
-    if (socketInstance.connected) {
-      setIsConnected(true);
-    }
-
     return () => {
       socketInstance.off("agent:event", handleEvent);
       socketInstance.off("connect", handleConnect);
@@ -62,7 +55,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [session?.access_token, addEvent]);
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+    <SocketContext.Provider value={{ isConnected }}>
       {children}
     </SocketContext.Provider>
   );
