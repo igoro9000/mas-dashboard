@@ -37,9 +37,6 @@ export function ChatView() {
 
   // On iOS, when input is focused scroll message list to bottom and input into view
   useEffect(() => {
-    const container = scrollAreaRef.current;
-    if (!container) return;
-
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") {
@@ -57,10 +54,6 @@ export function ChatView() {
 
   const handleSend = async (content: string) => {
     await send(content);
-    // Re-focus input after message is sent
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
   };
 
   const isEmpty = messages.length === 0;
@@ -91,10 +84,9 @@ export function ChatView() {
       {/* Messages */}
       <ScrollArea
         ref={scrollAreaRef}
-        className="flex-1"
+        className="flex-1 scroll-touch"
         style={{
           overscrollBehavior: "contain",
-          WebkitOverflowScrolling: "touch",
           paddingBottom: inputHeight,
         } as React.CSSProperties}
       >
