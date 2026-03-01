@@ -36,3 +36,16 @@ export function apiPost<T>(path: string, body: unknown) {
 export function apiDelete(path: string) {
   return apiFetch<void>(path, { method: "DELETE" });
 }
+
+export interface MergeBranchResult {
+  merged: boolean;
+  message: string;
+  pull_request_url?: string;
+}
+
+export function mergeBranch(
+  taskId: string,
+  branchName: string
+): Promise<MergeBranchResult> {
+  return apiPost<MergeBranchResult>(`/tasks/${taskId}/merge`, { branchName });
+}
