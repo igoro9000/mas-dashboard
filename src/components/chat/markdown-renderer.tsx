@@ -17,7 +17,6 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         components={{
           code({ className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: unknown }) {
             const match = /language-(\w+)/.exec(className || "");
-            // Use node to check if parent is a pre element (block code) vs inline
             const isInline = !match && !className;
 
             if (isInline) {
@@ -188,9 +187,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             );
           },
           hr({ ...props }) {
-            return (
-              <hr className="my-4 border-border" {...props} />
-            );
+            return <hr className="my-4 border-border" {...props} />;
           },
           table({ children, ...props }) {
             return (
