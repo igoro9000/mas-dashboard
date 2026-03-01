@@ -26,13 +26,15 @@ function AgentGrid() {
     );
   }
 
-  if (!agents?.length) {
+  const filteredAgents = agents?.filter((agent) => agent.name !== "debug");
+
+  if (!filteredAgents?.length) {
     return <p className="py-8 text-center text-sm text-muted-foreground">No agent data</p>;
   }
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {agents.map((agent) => (
+      {filteredAgents.map((agent) => (
         <AgentCard key={agent.name} agent={agent} />
       ))}
     </div>
