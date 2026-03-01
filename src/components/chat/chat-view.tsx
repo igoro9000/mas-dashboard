@@ -70,10 +70,7 @@ export function ChatView() {
       className="flex flex-col"
       style={{
         height: "100dvh",
-        // CSS fallback for browsers that don't support dvh
-        // @ts-ignore
-        ["--fallback-height" as string]: "100vh",
-        paddingBottom: keyboardHeight > 0 ? keyboardHeight : undefined,
+        paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined,
       }}
     >
       {/* Clear button */}
