@@ -54,10 +54,11 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
+      if (e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
+      // plain Enter → default behavior (Zeilenumbruch)
     };
 
     const handleInput = () => {
@@ -97,7 +98,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             onInput={isKeyboardOpen ? undefined : handleInput}
             onFocus={onFocus}
             onBlur={onBlur}
-            placeholder="Ask about tasks, agents..."
+            placeholder="Ask about tasks, agents… (Shift+Enter zum Senden)"
             rows={1}
             disabled={isStreaming}
             className={isKeyboardOpen
