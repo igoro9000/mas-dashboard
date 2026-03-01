@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageSquare, Trash2 } from "lucide-react";
 import { useChat } from "@/hooks/use-chat";
+import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard";
 import { ChatMessageBubble } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,70 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export function ChatView() {
   const { messages, isStreaming, send, stop, clear } = useChat();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  const [inputHeight, setInputHeight] = useState(0);
+  const { keyboardHeight } = useVirtualKeyboard();
 
+  // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Track input container height for padding
+  useEffect(() => {
+    if (!inputContainerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setInputHeight(entry.contentRect.height);
+      }
+    });
+    observer.observe(inputContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // On iOS, when input is focused scroll message list to bottom and input into view
+  useEffect(() => {
+    const container = scrollAreaRef.current;
+    if (!container) return;
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "TEXTAREA" || target.tagName === "INPUT") {
+        // Small delay to let the keyboard animate up
+        setTimeout(() => {
+          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+          target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 300);
+      }
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+    return () => document.removeEventListener("focusin", handleFocusIn);
+  }, []);
+
+  const handleSend = async (content: string) => {
+    await send(content);
+    // Re-focus input after message is sent
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+  };
+
+  const isEmpty = messages.length === 0;
+
   return (
-    <div className="flex flex-col h-[calc(100dvh-7.5rem)]">
+    <div
+      className="flex flex-col"
+      style={{
+        height: "100dvh",
+        // CSS fallback for browsers that don't support dvh
+        // @ts-ignore
+        ["--fallback-height" as string]: "100vh",
+        paddingBottom: keyboardHeight > 0 ? keyboardHeight : undefined,
+      }}
+    >
       {/* Clear button */}
       {messages.length > 0 && (
         <div className="flex justify-end px-3 py-1">
@@ -34,8 +92,16 @@ export function ChatView() {
       )}
 
       {/* Messages */}
-      <ScrollArea className="flex-1">
-        {messages.length === 0 ? (
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="flex-1"
+        style={{
+          overscrollBehavior: "contain",
+          WebkitOverflowScrolling: "touch",
+          paddingBottom: inputHeight,
+        } as React.CSSProperties}
+      >
+        {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground gap-3 px-8 text-center">
             <MessageSquare className="h-12 w-12 opacity-30" />
             <p className="text-sm">
@@ -58,7 +124,15 @@ export function ChatView() {
       </ScrollArea>
 
       {/* Input */}
-      <ChatInput onSend={send} onStop={stop} isStreaming={isStreaming} />
+      <div ref={inputContainerRef}>
+        <ChatInput
+          ref={inputRef}
+          onSend={handleSend}
+          onStop={stop}
+          isStreaming={isStreaming}
+          isEmpty={isEmpty}
+        />
+      </div>
     </div>
   );
 }
