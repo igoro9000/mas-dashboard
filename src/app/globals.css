@@ -169,6 +169,42 @@
 }
 
 /* ============================================================
+   Tool call card styles
+   ============================================================ */
+.tool-call-card {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: var(--card);
+  color: var(--card-foreground);
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.tool-call-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.tool-call-card-status {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.tool-call-card-result {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================================
    Markdown / prose styles for chat bubble content
    ============================================================ */
 .markdown-content {
