@@ -13,9 +13,9 @@ export function useTaskEvents(taskId: string) {
     if (!token || !taskId) return;
 
     const socket = getSocket(token);
-    socket.emit("subscribe", taskId);
+    socket.emit("task:subscribe", taskId);
     return () => {
-      socket.emit("unsubscribe", taskId);
+      socket.emit("task:unsubscribe", taskId);
     };
   }, [taskId, session?.access_token]);
 

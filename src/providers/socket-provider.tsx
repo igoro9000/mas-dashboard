@@ -31,8 +31,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     const token = session?.access_token;
     if (!token) {
       destroySocket();
-      setSocket(null);
-      setIsConnected(false);
       return;
     }
 
