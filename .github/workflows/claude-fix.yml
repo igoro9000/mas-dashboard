@@ -22,7 +22,10 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - name: Sync pnpm lockfile if needed
+        run: |
+          # Auto-fix can recover from lockfile drift — regenerate if frozen install fails
+          pnpm install --frozen-lockfile || (echo "Lockfile out of sync, regenerating..." && pnpm install)
       - name: Capture build errors
         run: |
           pnpm lint 2>&1 | tee /tmp/build-output.txt; true
@@ -40,7 +43,11 @@ jobs:
           ${BUILD_ERRORS}
 
           Fix all TypeScript and ESLint errors in this Next.js repository.
-          After fixing, run pnpm build to verify the fix works." \
+          After fixing, run pnpm build to verify the fix works.
+
+          IMPORTANT: If pnpm-lock.yaml is out of sync with package.json (ERR_PNPM_OUTDATED_LOCKFILE),
+          run 'pnpm install' to regenerate it. Always include pnpm-lock.yaml in your changes when
+          dependencies were added or removed." \
             --model claude-sonnet-4-6 --max-turns 10 \
             --allowedTools "Edit,Read,Bash,Write,Glob,Grep"
       - name: Commit and push fix
