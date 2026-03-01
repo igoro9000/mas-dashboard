@@ -56,7 +56,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
           </div>
         )}
 
-        <div className="group relative">
+        <div className={cn("group relative", !isUser && "w-full")}>
           <div
             className={cn(
               "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
