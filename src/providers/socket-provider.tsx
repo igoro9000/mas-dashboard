@@ -1,14 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "./auth-provider";
 import { getSocket, destroySocket } from "@/lib/socket";
 import { useEventStore } from "@/stores/event-store";
 import type { AgentEvent } from "@/types/event";
-import type { Socket } from "socket.io-client";
+import type { AppSocket } from "@/lib/socket";
 
 interface SocketContextValue {
-  socket: Socket | null;
+  socket: AppSocket | null;
   isConnected: boolean;
 }
 
@@ -24,7 +24,7 @@ export function useSocket() {
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { session } = useAuth();
   const addEvent = useEventStore((s) => s.addEvent);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socketRef = useRef<AppSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
 
     const socketInstance = getSocket(token);
+    socketRef.current = socketInstance;
 
     const handleEvent = (event: AgentEvent) => addEvent(event);
     const handleConnect = () => setIsConnected(true);
@@ -45,7 +46,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socketInstance.on("disconnect", handleDisconnect);
 
     socketInstance.connect();
-    setSocket(socketInstance);
 
     if (socketInstance.connected) {
       setIsConnected(true);
@@ -56,13 +56,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       socketInstance.off("connect", handleConnect);
       socketInstance.off("disconnect", handleDisconnect);
       destroySocket();
-      setSocket(null);
+      socketRef.current = null;
       setIsConnected(false);
     };
   }, [session?.access_token, addEvent]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
       {children}
     </SocketContext.Provider>
   );
