@@ -12,11 +12,12 @@ interface ChatInputProps {
   isEmpty?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
+  isKeyboardOpen?: boolean;
 }
 
 export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
   function ChatInput(
-    { onSend, onStop, isStreaming, isEmpty = false, onFocus, onBlur },
+    { onSend, onStop, isStreaming, isEmpty = false, onFocus, onBlur, isKeyboardOpen = false },
     ref
   ) {
     const [value, setValue] = useState("");
@@ -89,25 +90,34 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     };
 
     return (
-      <div className="border-t bg-background px-3 py-2">
-        {showSuggestions && (
+      <div className={isKeyboardOpen
+        ? "flex flex-col flex-1 min-h-0 border-t bg-background px-3 py-2"
+        : "border-t bg-background px-3 py-2"
+      }>
+        {showSuggestions && !isKeyboardOpen && (
           <div className="max-w-lg mx-auto mb-2">
             <SuggestedPrompts onSelect={handleSuggestedPrompt} />
           </div>
         )}
-        <div className="flex items-end gap-2 max-w-lg mx-auto">
+        <div className={isKeyboardOpen
+          ? "flex gap-2 max-w-lg mx-auto flex-1 min-h-0 items-end"
+          : "flex items-end gap-2 max-w-lg mx-auto"
+        }>
           <textarea
             ref={setRefs}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            onInput={handleInput}
+            onInput={isKeyboardOpen ? undefined : handleInput}
             onFocus={onFocus}
             onBlur={onBlur}
             placeholder="Ask about tasks, agents..."
             rows={1}
             disabled={isStreaming}
-            className="flex-1 resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+            className={isKeyboardOpen
+              ? "flex-1 min-h-0 overflow-y-auto resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+              : "flex-1 resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+            }
           />
           {isStreaming ? (
             <Button

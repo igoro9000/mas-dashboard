@@ -59,7 +59,7 @@ export function ChatView() {
 
       {/* Messages — hidden on mobile while keyboard is open */}
       {!hideMessages && (
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain">
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-muted-foreground gap-3 px-8 text-center">
               <MessageSquare className="h-12 w-12 opacity-30" />
@@ -105,14 +105,15 @@ export function ChatView() {
         </div>
       )}
 
-      {/* Input — always visible */}
-      <div className="shrink-0">
+      {/* Input — fills all space when keyboard is open, fixed size otherwise */}
+      <div className={hideMessages ? "flex-1 flex flex-col min-h-0" : "shrink-0"}>
         <ChatInput
           ref={inputRef}
           onSend={handleSend}
           onStop={stop}
           isStreaming={isStreaming}
           isEmpty={isEmpty}
+          isKeyboardOpen={hideMessages}
         />
       </div>
     </div>

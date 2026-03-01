@@ -45,7 +45,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
         {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
       </div>
 
-      <div className={cn("flex max-w-[80%] flex-col gap-1", isUser ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col gap-1", isUser ? "max-w-[80%] items-end" : "w-[calc(100%-2.25rem)] items-start")}>
         {/* Tool call cards rendered above the bubble for assistant messages */}
         {!isUser && hasToolCalls && (
           <div className="flex w-full flex-col gap-1.5">
