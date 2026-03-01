@@ -103,7 +103,10 @@ export function ToolCallCard({ toolName, status, result }: ToolCallCardProps) {
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
             Result
           </div>
-          <pre className="m-0 font-mono text-xs leading-relaxed text-foreground whitespace-pre-wrap break-words overflow-wrap-anywhere">
+          <pre
+            className="m-0 font-mono text-xs leading-relaxed text-foreground whitespace-pre-wrap break-words"
+            style={{ overflowWrap: "anywhere" }}
+          >
             {result ?? "No result returned."}
           </pre>
         </div>
