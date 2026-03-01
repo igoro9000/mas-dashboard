@@ -21,11 +21,22 @@ export interface PlannerOutput {
   branchName: string;
 }
 
+export interface TaskPlan {
+  summary: string;
+  steps: string[];
+  files: FileChange[];
+  branchName: string;
+}
+
 export interface Task {
   id: string;
+  title?: string;
+  description?: string;
+  status: TaskStatus;
+  plan?: TaskPlan | null;
+  agentId?: string | null;
   repoFullName: string;
   issueBody: string;
-  status: TaskStatus;
   plannerOutput: PlannerOutput | null;
   prNumber: number | null;
   branchName: string | null;
