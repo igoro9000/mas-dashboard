@@ -18,10 +18,10 @@ export function ChatView() {
   const [inputHeight, setInputHeight] = useState(0);
   const { keyboardHeight } = useVirtualKeyboard();
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change or streaming state changes
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isStreaming]);
 
   // Track input container height for padding
   useEffect(() => {
@@ -52,11 +52,22 @@ export function ChatView() {
     return () => document.removeEventListener("focusin", handleFocusIn);
   }, []);
 
+  // Scroll to bottom when keyboard height changes (virtual keyboard open/close)
+  useEffect(() => {
+    if (keyboardHeight > 0) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [keyboardHeight]);
+
   const handleSend = async (content: string) => {
     await send(content);
   };
 
   const isEmpty = messages.length === 0;
+  const lastMessage = messages[messages.length - 1];
+  const isLastMessageFromAssistant = lastMessage?.role === "assistant";
 
   return (
     <div
@@ -104,9 +115,31 @@ export function ChatView() {
               <ChatMessageBubble
                 key={msg.id}
                 message={msg}
-                isStreaming={isStreaming && msg.id === messages[messages.length - 1]?.id}
+                isStreaming={isStreaming && msg.id === lastMessage?.id}
               />
             ))}
+
+            {/* Typing indicator: show when streaming and last message is not yet from assistant */}
+            {isStreaming && !isLastMessageFromAssistant && (
+              <div className="flex items-center gap-2 px-4 py-2 text-muted-foreground">
+                <span className="flex gap-1">
+                  <span
+                    className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <span
+                    className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </span>
+                <span className="text-xs">Claude is thinking…</span>
+              </div>
+            )}
+
             <div ref={bottomRef} />
           </div>
         )}
