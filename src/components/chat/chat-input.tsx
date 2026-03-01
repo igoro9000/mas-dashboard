@@ -50,6 +50,8 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
           : internalRef.current;
       if (el) {
         el.style.height = "auto";
+        // Dismiss mobile keyboard by removing focus from the textarea
+        el.blur();
       }
     };
 
