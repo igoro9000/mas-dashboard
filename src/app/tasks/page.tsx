@@ -14,7 +14,7 @@ export default function TasksPage() {
 }
 
 function TaskList() {
-  const { data: tasks, isLoading, error } = useTasks();
+  const { tasks, isLoading, error } = useTasks();
 
   if (isLoading) {
     return (

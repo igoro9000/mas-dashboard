@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { Send, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SuggestedPrompts } from "@/components/chat/suggested-prompts";
+import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -17,6 +18,8 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     const [value, setValue] = useState("");
     const internalRef = useRef<HTMLTextAreaElement>(null);
     const wasStreamingRef = useRef(false);
+
+    useVirtualKeyboard();
 
     // Auto-focus textarea only after streaming ends (not on initial mount)
     useEffect(() => {
@@ -68,7 +71,6 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
 
     const handleSuggestedPrompt = (prompt: string) => {
       setValue(prompt);
-      // Auto-submit the suggested prompt
       handleSend(prompt);
     };
 
@@ -106,7 +108,8 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             onInput={handleInput}
             placeholder="Ask about tasks, agents..."
             rows={1}
-            className="flex-1 resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            disabled={isStreaming}
+            className="flex-1 resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
           />
           {isStreaming ? (
             <Button
@@ -122,7 +125,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
               size="icon"
               className="min-h-[44px] min-w-[44px] h-11 w-11 shrink-0 rounded-xl"
               onClick={() => handleSend()}
-              disabled={!value.trim()}
+              disabled={!value.trim() || isStreaming}
             >
               <Send className="h-4 w-4" />
             </Button>

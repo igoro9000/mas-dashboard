@@ -1,5 +1,13 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
-export default function Home() {
-  redirect("/tasks");
+export default async function Home() {
+  const cookieStore = await cookies();
+  const session = cookieStore.get("session");
+
+  if (session) {
+    redirect("/tasks");
+  } else {
+    redirect("/login");
+  }
 }

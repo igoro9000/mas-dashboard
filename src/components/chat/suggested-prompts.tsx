@@ -43,6 +43,7 @@ export function SuggestedPrompts({ onSelect, prompts = SUGGESTED_PROMPTS }: Sugg
               cursor-pointer
             "
             type="button"
+            aria-label={`Use suggested prompt: ${prompt}`}
           >
             {prompt}
           </button>

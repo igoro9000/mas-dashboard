@@ -5,6 +5,9 @@ const useVirtualKeyboard = () => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile) return;
+
     const updateKeyboardHeight = () => {
       if (!window.visualViewport) return;
 
@@ -21,23 +24,43 @@ const useVirtualKeyboard = () => {
     };
 
     let focusInTimer: ReturnType<typeof setTimeout> | undefined;
-    const handleFocusIn = () => {
+    const handleFocusIn = (event: FocusEvent) => {
       if (!window.visualViewport) return;
-      focusInTimer = setTimeout(updateKeyboardHeight, 100);
+
+      const target = event.target as HTMLElement;
+      const isInput =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target.isContentEditable;
+
+      if (!isInput) return;
+
+      clearTimeout(focusInTimer);
+      focusInTimer = setTimeout(updateKeyboardHeight, 150);
     };
 
     let focusOutTimer: ReturnType<typeof setTimeout> | undefined;
-    const handleFocusOut = () => {
+    const handleFocusOut = (event: FocusEvent) => {
+      const relatedTarget = event.relatedTarget as HTMLElement | null;
+      const isInputFocused =
+        relatedTarget instanceof HTMLInputElement ||
+        relatedTarget instanceof HTMLTextAreaElement ||
+        relatedTarget?.isContentEditable;
+
+      if (isInputFocused) return;
+
+      clearTimeout(focusOutTimer);
       focusOutTimer = setTimeout(() => {
         setKeyboardHeight(0);
         setIsKeyboardOpen(false);
         document.documentElement.style.setProperty("--keyboard-height", "0px");
-      }, 100);
+      }, 150);
     };
 
     document.documentElement.style.setProperty("--keyboard-height", "0px");
 
     window.visualViewport?.addEventListener("resize", updateKeyboardHeight);
+    window.visualViewport?.addEventListener("scroll", updateKeyboardHeight);
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
 
@@ -45,6 +68,7 @@ const useVirtualKeyboard = () => {
       clearTimeout(focusInTimer);
       clearTimeout(focusOutTimer);
       window.visualViewport?.removeEventListener("resize", updateKeyboardHeight);
+      window.visualViewport?.removeEventListener("scroll", updateKeyboardHeight);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
       document.documentElement.style.removeProperty("--keyboard-height");

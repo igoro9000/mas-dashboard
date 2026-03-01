@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { AuthGuard } from "@/components/layout/auth-guard";
 import { useTask } from "@/hooks/use-task";
 import { useTaskEvents } from "@/hooks/use-task-events";
@@ -10,7 +11,8 @@ import { EventFeed } from "@/components/events/event-feed";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink, GitBranch, GitPullRequest } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, GitBranch, GitPullRequest, MessageSquare } from "lucide-react";
 
 export default function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +25,7 @@ export default function TaskDetailPage() {
 }
 
 function TaskDetail({ id }: { id: string }) {
-  const { data: task, isLoading } = useTask(id);
+  const { task, isLoading } = useTask(id);
   const events = useTaskEvents(id);
 
   if (isLoading) {
@@ -42,10 +44,18 @@ function TaskDetail({ id }: { id: string }) {
 
   return (
     <div className="space-y-4">
-      {/* Status banner */}
+      {/* Header: status + short id + chat link */}
       <div className="flex items-center justify-between">
-        <TaskStatusBadge status={task.status} />
-        <span className="text-xs text-muted-foreground font-mono">{task.id.slice(0, 8)}</span>
+        <div className="flex items-center gap-3">
+          <TaskStatusBadge status={task.status} />
+          <span className="text-xs text-muted-foreground font-mono">{task.id.slice(0, 8)}</span>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/chat/${task.id}`}>
+            <MessageSquare className="h-4 w-4 mr-1.5" />
+            Open Chat
+          </Link>
+        </Button>
       </div>
 
       {/* Info card */}
@@ -55,12 +65,15 @@ function TaskDetail({ id }: { id: string }) {
             <GitBranch className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">{task.repoFullName}</span>
           </div>
-          <p className="text-sm text-muted-foreground">{task.issueBody}</p>
+
+          {task.issueBody && (
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{task.issueBody}</p>
+          )}
 
           {task.branchName && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <GitBranch className="h-3.5 w-3.5" />
-              <code>{task.branchName}</code>
+              <code className="bg-muted px-1 py-0.5 rounded">{task.branchName}</code>
             </div>
           )}
 
@@ -69,7 +82,7 @@ function TaskDetail({ id }: { id: string }) {
               href={`https://github.com/${task.repoFullName}/pull/${task.prNumber}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-primary hover:underline"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
             >
               <GitPullRequest className="h-4 w-4" />
               PR #{task.prNumber}
@@ -83,6 +96,7 @@ function TaskDetail({ id }: { id: string }) {
       {task.plannerOutput && (
         <Card>
           <CardContent className="p-4">
+            <h2 className="text-sm font-semibold mb-3">Execution Plan</h2>
             <TaskPlanView plan={task.plannerOutput} />
           </CardContent>
         </Card>
