@@ -2,13 +2,12 @@
 
 import type { AgentEvent, AgentName } from "@/types/event";
 import { relativeTime, cn } from "@/lib/utils";
-import { Bot, Code, Search, Bug } from "lucide-react";
+import { Bot, Code, Search } from "lucide-react";
 
 const agentConfig: Record<AgentName, { icon: typeof Bot; color: string }> = {
   planner: { icon: Bot, color: "text-blue-500" },
   coder: { icon: Code, color: "text-violet-500" },
   reviewer: { icon: Search, color: "text-amber-500" },
-  debugger: { icon: Bug, color: "text-orange-500" },
 };
 
 export function EventItem({ event }: { event: AgentEvent }) {

@@ -1,4 +1,4 @@
-export type AgentName = "planner" | "coder" | "reviewer" | "debugger";
+export type AgentName = "planner" | "coder" | "reviewer";
 
 export type AgentEventType =
   | "agent:started"
