@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "highlight.js/styles/github-dark.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -49,6 +50,7 @@
 
 :root {
   --radius: 0.625rem;
+  --keyboard-height: 0px;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -123,4 +125,81 @@
   body {
     @apply bg-background text-foreground overscroll-none;
   }
+}
+
+/* ============================================================
+   Chat container — full viewport height with dvh fallback
+   ============================================================ */
+.chat-container {
+  height: 100vh; /* fallback for browsers without dvh support */
+  height: 100dvh;
+}
+
+/* ============================================================
+   Smooth touch scrolling with contained overscroll
+   ============================================================ */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ============================================================
+   Minimum touch target utility classes
+   ============================================================ */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ============================================================
+   Blinking cursor animation
+   ============================================================ */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s step-start infinite;
+}
+
+/* ============================================================
+   Tool call card styles
+   ============================================================ */
+.tool-call-card {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background-color: var(--card);
+  color: var(--card-foreground);
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.tool-call-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.tool-call-card-status {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.tool-call-card-result {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
