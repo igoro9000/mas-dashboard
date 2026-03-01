@@ -35,6 +35,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
 
   return (
     <div className={cn("flex gap-2 px-3 py-2", isUser ? "flex-row-reverse" : "flex-row")}>
+      {/* Avatar */}
       <div
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
@@ -45,7 +46,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
       </div>
 
       <div className={cn("flex max-w-[80%] flex-col gap-1", isUser ? "items-end" : "items-start")}>
-        {/* Tool call cards rendered above the bubble for AI messages */}
+        {/* Tool call cards rendered above the bubble for assistant messages */}
         {!isUser && hasToolCalls && (
           <div className="flex w-full flex-col gap-1.5">
             {message.toolCalls!.map((tool) => (
@@ -74,15 +75,17 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
                 : "bg-muted rounded-bl-md"
             )}
           >
-            {hasToolCalls && isEmpty && (
+            {/* Spinner shown when tool calls are in progress but no content yet */}
+            {!isUser && hasToolCalls && isEmpty && (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Wrench className="h-3.5 w-3.5 animate-spin" />
                 <span className="text-xs">
-                  Using {message.toolCalls![message.toolCalls!.length - 1].name}...
+                  Using {message.toolCalls![message.toolCalls!.length - 1].name}…
                 </span>
               </div>
             )}
 
+            {/* Message content */}
             {message.content && (
               <>
                 {isUser ? (
@@ -94,6 +97,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
               </>
             )}
 
+            {/* Bouncing dots when streaming with no content and no tool calls */}
             {!isUser && isEmpty && !hasToolCalls && isStreaming && (
               <div className="flex gap-1">
                 <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/40 [animation-delay:0ms]" />
@@ -103,7 +107,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
             )}
           </div>
 
-          {/* Copy button for AI messages */}
+          {/* Copy button for assistant messages with content */}
           {!isUser && message.content && (
             <button
               onClick={handleCopy}
@@ -113,7 +117,7 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
                 "flex min-h-[44px] min-w-[44px] items-center justify-center",
                 "rounded-lg text-muted-foreground transition-colors",
                 "opacity-0 group-hover:opacity-100 focus:opacity-100",
-                "hover:bg-muted hover:text-foreground",
+                "hover:bg-muted hover:text-foreground"
               )}
             >
               {copied ? (
