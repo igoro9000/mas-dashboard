@@ -15,8 +15,9 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
         components={{
-          code({ className, children, ...props }) {
+          code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: unknown }) {
             const match = /language-(\w+)/.exec(className || "");
+            // Use node to check if parent is a pre element (block code) vs inline
             const isInline = !match && !className;
 
             if (isInline) {
