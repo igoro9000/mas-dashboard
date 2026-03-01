@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import type { ChatMessage } from "@/types/chat";
 import { supabase } from "@/lib/supabase";
+import { useChatStore } from "@/stores/chat-store";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 const WS_BASE = process.env.NEXT_PUBLIC_WS_BASE_URL ?? BASE.replace(/^http/, "ws");
 
 export function useChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
+  const messages = useChatStore((s) => s.messages);
+  const isStreaming = useChatStore((s) => s.isStreaming);
   const abortRef = useRef<AbortController | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,30 +56,21 @@ export function useChat() {
         switch (payload.type) {
           case "chat:new":
             if (payload.message) {
-              setMessages((prev) => {
-                const exists = prev.some((m) => m.id === payload.message!.id);
-                return exists ? prev : [...prev, payload.message!];
-              });
+              useChatStore.getState().addMessage(payload.message);
             }
             break;
 
           case "chat:update":
             if (payload.messageId) {
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === payload.messageId
-                    ? { ...m, content: payload.content ?? m.content }
-                    : m
-                )
-              );
+              useChatStore.getState().updateMessage(payload.messageId, {
+                content: payload.content ?? "",
+              });
             }
             break;
 
           case "chat:delete":
             if (payload.messageId) {
-              setMessages((prev) =>
-                prev.filter((m) => m.id !== payload.messageId)
-              );
+              useChatStore.getState().removeMessage(payload.messageId);
             }
             break;
 
@@ -96,7 +88,6 @@ export function useChat() {
 
     ws.onclose = () => {
       if (!mountedRef.current) return;
-      // Exponential back-off reconnect (cap at 30 s)
       reconnectTimerRef.current = setTimeout(() => {
         if (mountedRef.current) connectSocket();
       }, 5_000);
@@ -128,7 +119,7 @@ export function useChat() {
       });
       if (!res.ok) return;
       const data: ChatMessage[] = await res.json();
-      if (mountedRef.current) setMessages(data);
+      if (mountedRef.current) useChatStore.getState().setMessages(data);
     } catch {
       // network errors are silently ignored; socket will keep state in sync
     }
@@ -158,16 +149,20 @@ export function useChat() {
         timestamp: Date.now(),
       };
 
-      setMessages((prev) => [...prev, userMsg, assistantMsg]);
-      setIsStreaming(true);
-
       const assistantId = assistantMsg.id;
 
-      // Build history for API (only role + content)
-      const history = [...messages, userMsg].map((m) => ({
+      // Build history before adding new messages (no stale closure — reads from store)
+      const history = [
+        ...useChatStore.getState().messages,
+        userMsg,
+      ].map((m) => ({
         role: m.role,
         content: m.content,
       }));
+
+      useChatStore.getState().addMessage(userMsg);
+      useChatStore.getState().addMessage(assistantMsg);
+      useChatStore.getState().setIsStreaming(true);
 
       const token = await getToken();
 
@@ -187,20 +182,18 @@ export function useChat() {
 
         if (!res.ok) {
           const body = await res.text();
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: `Error: ${res.status} — ${body}` }
-                : m
-            )
-          );
-          setIsStreaming(false);
+          useChatStore
+            .getState()
+            .updateMessage(assistantId, {
+              content: `Error: ${res.status} — ${body}`,
+            });
+          useChatStore.getState().setIsStreaming(false);
           return;
         }
 
         const reader = res.body?.getReader();
         if (!reader) {
-          setIsStreaming(false);
+          useChatStore.getState().setIsStreaming(false);
           return;
         }
 
@@ -224,43 +217,17 @@ export function useChat() {
               try {
                 const data = JSON.parse(dataStr);
                 if (eventType === "delta" && data.text) {
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? { ...m, content: m.content + data.text }
-                        : m
-                    )
-                  );
+                  useChatStore.getState().appendToMessage(assistantId, data.text);
                 } else if (eventType === "tool_use" && data.tool) {
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? {
-                            ...m,
-                            toolCalls: [...(m.toolCalls ?? []), data.tool],
-                          }
-                        : m
-                    )
-                  );
+                  useChatStore.getState().addToolCall(assistantId, data.tool);
                 } else if (eventType === "message_id" && data.id) {
-                  // Server may confirm the persisted IDs after streaming
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId ? { ...m, id: data.id } : m
-                    )
-                  );
+                  useChatStore.getState().updateMessage(assistantId, { id: data.id });
                 } else if (eventType === "error") {
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? {
-                            ...m,
-                            content:
-                              m.content + `\n\nError: ${data.error ?? "unknown"}`,
-                          }
-                        : m
-                    )
-                  );
+                  useChatStore.getState().updateMessage(assistantId, {
+                    content:
+                      useChatStore.getState().messages.find((m) => m.id === assistantId)
+                        ?.content + `\n\nError: ${data.error ?? "unknown"}`,
+                  });
                 }
               } catch {
                 // ignore parse errors
@@ -271,20 +238,18 @@ export function useChat() {
         }
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: `Error: ${(err as Error).message}` }
-                : m
-            )
-          );
+          useChatStore
+            .getState()
+            .updateMessage(assistantId, {
+              content: `Error: ${(err as Error).message}`,
+            });
         }
       } finally {
-        setIsStreaming(false);
+        useChatStore.getState().setIsStreaming(false);
         abortRef.current = null;
       }
     },
-    [messages, getToken]
+    [getToken]
   );
 
   // ---------- stop ----------
@@ -297,8 +262,8 @@ export function useChat() {
 
   const clear = useCallback(() => {
     abortRef.current?.abort();
-    setMessages([]);
-    setIsStreaming(false);
+    useChatStore.getState().clearMessages();
+    useChatStore.getState().setIsStreaming(false);
   }, []);
 
   return { messages, isStreaming, send, stop, clear, fetchMessages };

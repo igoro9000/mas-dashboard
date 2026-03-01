@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 const useVirtualKeyboard = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setIsMobile(mobile);
+    const isMobile = mobile;
     if (!isMobile) return;
 
     const updateKeyboardHeight = () => {
@@ -75,7 +78,7 @@ const useVirtualKeyboard = () => {
     };
   }, []);
 
-  return { keyboardHeight, isKeyboardOpen };
+  return { keyboardHeight, isKeyboardOpen, isMobile };
 };
 
 export { useVirtualKeyboard };

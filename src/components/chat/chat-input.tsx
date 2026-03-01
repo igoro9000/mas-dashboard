@@ -4,22 +4,24 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { Send, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SuggestedPrompts } from "@/components/chat/suggested-prompts";
-import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
   onStop: () => void;
   isStreaming: boolean;
   isEmpty?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
-  function ChatInput({ onSend, onStop, isStreaming, isEmpty = false }, ref) {
+  function ChatInput(
+    { onSend, onStop, isStreaming, isEmpty = false, onFocus, onBlur },
+    ref
+  ) {
     const [value, setValue] = useState("");
     const internalRef = useRef<HTMLTextAreaElement>(null);
     const wasStreamingRef = useRef(false);
-
-    useVirtualKeyboard();
 
     // Auto-focus textarea only after streaming ends (not on initial mount)
     useEffect(() => {
@@ -87,13 +89,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     };
 
     return (
-      <div
-        className="border-t bg-background px-3 py-2"
-        style={{
-          paddingBottom:
-            "calc(env(safe-area-inset-bottom) + var(--keyboard-height, 0px) + 0.5rem)",
-        }}
-      >
+      <div className="border-t bg-background px-3 py-2">
         {showSuggestions && (
           <div className="max-w-lg mx-auto mb-2">
             <SuggestedPrompts onSelect={handleSuggestedPrompt} />
@@ -106,6 +102,8 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
             onInput={handleInput}
+            onFocus={onFocus}
+            onBlur={onBlur}
             placeholder="Ask about tasks, agents..."
             rows={1}
             disabled={isStreaming}
