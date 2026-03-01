@@ -16,10 +16,16 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
   function ChatInput({ onSend, onStop, isStreaming, isEmpty = false }, ref) {
     const [value, setValue] = useState("");
     const internalRef = useRef<HTMLTextAreaElement>(null);
+    const wasStreamingRef = useRef(false);
 
-    // Auto-focus textarea after message is sent (when streaming starts)
+    // Auto-focus textarea only after streaming ends (not on initial mount)
     useEffect(() => {
-      if (isStreaming) return;
+      if (isStreaming) {
+        wasStreamingRef.current = true;
+        return;
+      }
+      if (!wasStreamingRef.current) return;
+      wasStreamingRef.current = false;
       const el =
         ref && typeof ref === "object" && ref.current
           ? ref.current
