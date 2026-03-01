@@ -25,10 +25,13 @@ const useVirtualKeyboard = () => {
       setTimeout(updateKeyboardHeight, 100);
     };
 
+    let focusOutTimer: ReturnType<typeof setTimeout>;
     const handleFocusOut = () => {
-      setKeyboardHeight(0);
-      setIsKeyboardOpen(false);
-      document.documentElement.style.setProperty("--keyboard-height", "0px");
+      focusOutTimer = setTimeout(() => {
+        setKeyboardHeight(0);
+        setIsKeyboardOpen(false);
+        document.documentElement.style.setProperty("--keyboard-height", "0px");
+      }, 100);
     };
 
     document.documentElement.style.setProperty("--keyboard-height", "0px");
@@ -38,6 +41,7 @@ const useVirtualKeyboard = () => {
     document.addEventListener("focusout", handleFocusOut);
 
     return () => {
+      clearTimeout(focusOutTimer);
       window.visualViewport?.removeEventListener("resize", updateKeyboardHeight);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
@@ -48,4 +52,5 @@ const useVirtualKeyboard = () => {
   return { keyboardHeight, isKeyboardOpen };
 };
 
+export { useVirtualKeyboard };
 export default useVirtualKeyboard;
