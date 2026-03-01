@@ -4,7 +4,9 @@ const useVirtualKeyboard = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [isMobile] = useState(
-    () => typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    () =>
+      typeof navigator !== "undefined" &&
+      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   );
 
   useEffect(() => {
