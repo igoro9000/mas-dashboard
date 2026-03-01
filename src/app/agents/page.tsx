@@ -14,7 +14,7 @@ export default function AgentsPage() {
 }
 
 function AgentGrid() {
-  const { data: agents, isLoading } = useAgentStatus();
+  const { agents, isLoading } = useAgentStatus();
 
   if (isLoading) {
     return (
@@ -27,7 +27,11 @@ function AgentGrid() {
   }
 
   if (!agents?.length) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">No agent data</p>;
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        No agents found
+      </p>
+    );
   }
 
   return (
