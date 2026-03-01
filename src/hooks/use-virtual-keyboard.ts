@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const useVirtualKeyboard = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -20,12 +20,13 @@ const useVirtualKeyboard = () => {
       );
     };
 
+    let focusInTimer: ReturnType<typeof setTimeout> | undefined;
     const handleFocusIn = () => {
       if (!window.visualViewport) return;
-      setTimeout(updateKeyboardHeight, 100);
+      focusInTimer = setTimeout(updateKeyboardHeight, 100);
     };
 
-    let focusOutTimer: ReturnType<typeof setTimeout>;
+    let focusOutTimer: ReturnType<typeof setTimeout> | undefined;
     const handleFocusOut = () => {
       focusOutTimer = setTimeout(() => {
         setKeyboardHeight(0);
@@ -41,6 +42,7 @@ const useVirtualKeyboard = () => {
     document.addEventListener("focusout", handleFocusOut);
 
     return () => {
+      clearTimeout(focusInTimer);
       clearTimeout(focusOutTimer);
       window.visualViewport?.removeEventListener("resize", updateKeyboardHeight);
       document.removeEventListener("focusin", handleFocusIn);
