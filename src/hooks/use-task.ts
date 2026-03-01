@@ -17,6 +17,8 @@ export function useTask(id: string) {
     }
   );
 
+  const { mutate } = swr;
+
   useEffect(() => {
     const token = session?.access_token;
     if (!id || !token) return;
@@ -24,7 +26,7 @@ export function useTask(id: string) {
     const socket = getSocket(token);
 
     const handleTaskUpdate = () => {
-      swr.mutate();
+      mutate();
     };
 
     socket.on("task:update", handleTaskUpdate);
@@ -32,7 +34,7 @@ export function useTask(id: string) {
     return () => {
       socket.off("task:update", handleTaskUpdate);
     };
-  }, [id, session?.access_token, swr.mutate]);
+  }, [id, session?.access_token, mutate]);
 
   return {
     task: swr.data,

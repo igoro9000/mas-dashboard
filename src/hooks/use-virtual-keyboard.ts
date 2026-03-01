@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 const useVirtualKeyboard = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile] = useState(
+    () => typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  );
 
   useEffect(() => {
-    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    setIsMobile(mobile);
-    const isMobile = mobile;
     if (!isMobile) return;
 
     const updateKeyboardHeight = () => {
@@ -76,7 +75,7 @@ const useVirtualKeyboard = () => {
       document.removeEventListener("focusout", handleFocusOut);
       document.documentElement.style.removeProperty("--keyboard-height");
     };
-  }, []);
+  }, [isMobile]);
 
   return { keyboardHeight, isKeyboardOpen, isMobile };
 };

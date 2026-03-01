@@ -35,18 +35,20 @@ export function useAgentStatus() {
     },
   );
 
+  const { mutate } = swr;
+
   useEffect(() => {
     const token = session?.access_token;
     if (!token) return;
 
     const socket = getSocket(token);
 
-    socket.on("agent:status", () => { swr.mutate(); });
+    socket.on("agent:status", () => { mutate(); });
 
     return () => {
       socket.off("agent:status");
     };
-  }, [session?.access_token, swr.mutate]);
+  }, [session?.access_token, mutate]);
 
   const reviewAgent = swr.data?.find((agent) => agent.agentType === "review");
 

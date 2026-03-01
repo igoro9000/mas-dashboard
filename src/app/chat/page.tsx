@@ -2,7 +2,6 @@
 
 import { AuthGuard } from "@/components/layout/auth-guard";
 import { ChatView } from "@/components/chat/chat-view";
-import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 function ChatPageContent() {
