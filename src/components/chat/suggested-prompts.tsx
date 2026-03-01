@@ -7,16 +7,17 @@ const SUGGESTED_PROMPTS = [
 
 interface SuggestedPromptsProps {
   onSelect: (prompt: string) => void;
+  prompts?: string[];
 }
 
-export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
+export function SuggestedPrompts({ onSelect, prompts = SUGGESTED_PROMPTS }: SuggestedPromptsProps) {
   return (
     <div className="flex flex-col items-center gap-4 py-8 px-4">
       <p className="text-sm text-muted-foreground">
         Get started with a suggested prompt
       </p>
       <div className="flex flex-wrap justify-center gap-2 max-w-lg">
-        {SUGGESTED_PROMPTS.map((prompt) => (
+        {prompts.map((prompt) => (
           <button
             key={prompt}
             onClick={() => onSelect(prompt)}
