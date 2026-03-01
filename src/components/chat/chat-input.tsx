@@ -98,7 +98,6 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             onInput={isKeyboardOpen ? undefined : handleInput}
             onFocus={onFocus}
             onBlur={onBlur}
-            placeholder="Ask about tasks, agents… (Shift+Enter zum Senden)"
             rows={1}
             disabled={isStreaming}
             className={isKeyboardOpen
