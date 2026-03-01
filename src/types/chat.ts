@@ -11,6 +11,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: number;
-  isStreaming: boolean;
+  timestampISO?: string;
+  isStreaming?: boolean;
   toolCalls?: ToolCall[];
 }
