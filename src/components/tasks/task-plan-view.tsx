@@ -1,21 +1,62 @@
 "use client";
 
 import type { PlannerOutput } from "@/types/task";
-import { FileCode, ArrowRight } from "lucide-react";
+import { FileCode, ArrowRight, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function TaskPlanView({ plan }: { plan: PlannerOutput }) {
+interface TaskPlanViewProps {
+  plan: PlannerOutput;
+  currentStep?: number;
+  completedSteps?: number[];
+}
+
+export function TaskPlanView({ plan, currentStep, completedSteps = [] }: TaskPlanViewProps) {
+  const isStepCompleted = (index: number) => completedSteps.includes(index);
+  const isCurrentStep = (index: number) => currentStep === index;
+
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold">Plan</h3>
       <p className="text-sm text-muted-foreground">{plan.summary}</p>
 
-      <ol className="space-y-1.5">
-        {plan.steps.map((step, i) => (
-          <li key={i} className="flex gap-2 text-sm">
-            <span className="text-muted-foreground shrink-0">{i + 1}.</span>
-            <span>{step}</span>
-          </li>
-        ))}
+      <ol className="space-y-2">
+        {plan.steps.map((step, i) => {
+          const completed = isStepCompleted(i);
+          const current = isCurrentStep(i);
+
+          return (
+            <li
+              key={i}
+              className={cn(
+                "flex gap-2.5 text-sm rounded-md px-2 py-1.5 transition-colors",
+                current && "bg-muted",
+                completed && "text-muted-foreground"
+              )}
+            >
+              <span className="mt-0.5 shrink-0">
+                {completed ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                ) : current ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : (
+                  <Circle className="h-4 w-4 text-muted-foreground" />
+                )}
+              </span>
+              <span
+                className={cn(
+                  "leading-snug",
+                  completed && "line-through decoration-muted-foreground/50",
+                  current && "font-medium text-foreground"
+                )}
+              >
+                {step}
+              </span>
+              <span className="ml-auto shrink-0 text-xs text-muted-foreground self-start mt-0.5">
+                {i + 1}/{plan.steps.length}
+              </span>
+            </li>
+          );
+        })}
       </ol>
 
       {plan.files.length > 0 && (
