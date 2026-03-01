@@ -17,28 +17,27 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     const [value, setValue] = useState("");
     const internalRef = useRef<HTMLTextAreaElement>(null);
 
-    // Resolve the textarea element from either the forwarded ref or internal ref
-    const getTextarea = (): HTMLTextAreaElement | null => {
-      if (ref && typeof ref === "object" && ref.current) return ref.current;
-      return internalRef.current;
-    };
-
     // Auto-focus textarea after message is sent (when streaming starts)
     useEffect(() => {
       if (isStreaming) return;
-      const el = getTextarea();
+      const el =
+        ref && typeof ref === "object" && ref.current
+          ? ref.current
+          : internalRef.current;
       if (el) {
         el.focus();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isStreaming]);
+    }, [isStreaming, ref]);
 
     const handleSend = (text?: string) => {
       const trimmed = (text ?? value).trim();
       if (!trimmed || isStreaming) return;
       onSend(trimmed);
       setValue("");
-      const el = getTextarea();
+      const el =
+        ref && typeof ref === "object" && ref.current
+          ? ref.current
+          : internalRef.current;
       if (el) {
         el.style.height = "auto";
       }
@@ -52,7 +51,10 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     };
 
     const handleInput = () => {
-      const el = getTextarea();
+      const el =
+        ref && typeof ref === "object" && ref.current
+          ? ref.current
+          : internalRef.current;
       if (!el) return;
       el.style.height = "auto";
       el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
