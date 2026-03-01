@@ -6,10 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 function ChatPageContent() {
-  const searchParams = useSearchParams();
-  const taskId = searchParams.get("taskId") ?? undefined;
-
-  return <ChatView taskId={taskId} />;
+  return <ChatView />;
 }
 
 export default function ChatPage() {

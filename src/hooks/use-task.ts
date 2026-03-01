@@ -2,9 +2,12 @@ import useSWR from "swr";
 import { useEffect } from "react";
 import { apiGet } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
+import { useAuth } from "@/providers/auth-provider";
 import type { Task } from "@/types/task";
 
 export function useTask(id: string) {
+  const { session } = useAuth();
+
   const swr = useSWR<Task>(
     id ? `task-${id}` : null,
     () => apiGet<Task>(`/tasks/${id}`),
@@ -15,27 +18,21 @@ export function useTask(id: string) {
   );
 
   useEffect(() => {
-    if (!id) return;
+    const token = session?.access_token;
+    if (!id || !token) return;
 
-    const socket = getSocket();
+    const socket = getSocket(token);
 
-    const handleTaskUpdate = (updatedTask: Task) => {
-      if (updatedTask.id === id) {
-        swr.mutate(updatedTask, false);
-      }
+    const handleTaskUpdate = () => {
+      swr.mutate();
     };
 
-    socket.on("task:updated", handleTaskUpdate);
-    socket.on("task:deleted", (deletedId: string) => {
-      if (deletedId === id) {
-        swr.mutate(undefined, false);
-      }
-    });
+    socket.on("task:update", handleTaskUpdate);
 
     return () => {
-      socket.off("task:updated", handleTaskUpdate);
+      socket.off("task:update", handleTaskUpdate);
     };
-  }, [id, swr.mutate]);
+  }, [id, session?.access_token, swr.mutate]);
 
   return {
     task: swr.data,

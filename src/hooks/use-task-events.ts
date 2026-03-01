@@ -8,7 +8,6 @@ export function useTaskEvents(taskId: string) {
   const { session } = useAuth();
   const events = useEventStore((s) => s.eventsByTask[taskId] ?? []);
   const addEvent = useEventStore((s) => s.addEvent);
-  const setEvents = useEventStore((s) => s.setEvents);
 
   useEffect(() => {
     const token = session?.access_token;
@@ -16,29 +15,21 @@ export function useTaskEvents(taskId: string) {
 
     const socket = getSocket(token);
 
-    socket.emit("subscribe", taskId);
-
-    const handleTaskEvents = (initialEvents: AgentEvent[]) => {
-      setEvents(taskId, initialEvents);
-    };
+    socket.emit("task:subscribe", taskId);
 
     const handleNewEvent = (event: AgentEvent) => {
-      if (event.task_id === taskId) {
+      if (event.taskId === taskId) {
         addEvent(event);
       }
     };
 
-    socket.on(`task:${taskId}:events`, handleTaskEvents);
-    socket.on(`task:${taskId}:event`, handleNewEvent);
-    socket.on("event", handleNewEvent);
+    socket.on("agent:event", handleNewEvent);
 
     return () => {
-      socket.emit("unsubscribe", taskId);
-      socket.off(`task:${taskId}:events`, handleTaskEvents);
-      socket.off(`task:${taskId}:event`, handleNewEvent);
-      socket.off("event", handleNewEvent);
+      socket.emit("task:unsubscribe", taskId);
+      socket.off("agent:event", handleNewEvent);
     };
-  }, [taskId, session?.access_token, addEvent, setEvents]);
+  }, [taskId, session?.access_token, addEvent]);
 
   return events as AgentEvent[];
 }

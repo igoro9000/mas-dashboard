@@ -19,7 +19,7 @@ export function TaskCard({ task }: { task: Task }) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
               <span className="text-sm font-semibold truncate leading-tight">
-                {task.issueTitle ?? `Task #${task.id}`}
+                {task.title ?? `Task #${task.id.slice(0, 8)}`}
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
                 <GitBranch className="h-3 w-3 shrink-0" />
@@ -36,10 +36,10 @@ export function TaskCard({ task }: { task: Task }) {
           )}
 
           <div className="flex items-center justify-between pt-0.5">
-            {task.agentName ? (
+            {task.agentId ? (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Bot className="h-3 w-3 shrink-0" />
-                {task.agentName}
+                {task.agentId.slice(0, 8)}
               </span>
             ) : (
               <span />

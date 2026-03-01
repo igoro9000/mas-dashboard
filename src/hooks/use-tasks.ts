@@ -1,7 +1,8 @@
 import useSWR from "swr";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { apiGet } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
+import { useAuth } from "@/providers/auth-provider";
 import type { Task } from "@/types/task";
 
 export interface UseTasksOptions {
@@ -76,6 +77,7 @@ async function fetchTasks(options: UseTasksOptions): Promise<TasksApiResponse> {
 }
 
 export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
+  const { session } = useAuth();
   const {
     page = 1,
     pageSize = 20,
@@ -106,41 +108,20 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksResult {
     }
   );
 
-  const mutateRef = useRef(mutate);
-  mutateRef.current = mutate;
-
   useEffect(() => {
-    let socket: ReturnType<typeof getSocket> | null = null;
+    const token = session?.access_token;
+    if (!token) return;
 
-    try {
-      socket = getSocket();
-    } catch {
-      // Socket not available in this environment; skip subscription
-      return;
-    }
+    const socket = getSocket(token);
 
-    const handleTaskCreated = () => {
-      mutateRef.current();
-    };
+    const handleUpdate = () => { mutate(); };
 
-    const handleTaskUpdated = () => {
-      mutateRef.current();
-    };
-
-    const handleTaskDeleted = () => {
-      mutateRef.current();
-    };
-
-    socket.on("task:created", handleTaskCreated);
-    socket.on("task:updated", handleTaskUpdated);
-    socket.on("task:deleted", handleTaskDeleted);
+    socket.on("task:update", handleUpdate);
 
     return () => {
-      socket?.off("task:created", handleTaskCreated);
-      socket?.off("task:updated", handleTaskUpdated);
-      socket?.off("task:deleted", handleTaskDeleted);
+      socket.off("task:update", handleUpdate);
     };
-  }, []);
+  }, [session?.access_token, mutate]);
 
   return {
     tasks: data?.data ?? [],

@@ -70,7 +70,6 @@ export type AgentCapability =
   | "createPullRequest"
   | "resolveConflicts"
   | "codeGeneration"
-  | "debugging"
   | "documentation"
   | "deployment";
 

@@ -3,7 +3,6 @@ export type TaskStatus =
   | "planning"
   | "coding"
   | "reviewing"
-  | "debugging"
   | "done"
   | "failed"
   | "escalated";

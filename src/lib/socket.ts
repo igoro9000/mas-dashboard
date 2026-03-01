@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import type { AgentEvent } from "@/types/event";
 
 // ---------------------------------------------------------------------------
 // Typed event payloads
@@ -45,6 +46,7 @@ export interface EventNewPayload {
 export interface ServerToClientEvents {
   "task:update": (payload: TaskUpdatePayload) => void;
   "agent:status": (payload: AgentStatusPayload) => void;
+  "agent:event": (payload: AgentEvent) => void;
   "chat:message": (payload: ChatMessagePayload) => void;
   "event:new": (payload: EventNewPayload) => void;
   connect_error: (err: Error) => void;

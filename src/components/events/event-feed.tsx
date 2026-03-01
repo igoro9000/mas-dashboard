@@ -12,7 +12,7 @@ interface EventFeedProps {
 
 export function EventFeed({ taskId, events: externalEvents }: EventFeedProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { events: liveEvents } = useTaskEvents(taskId);
+  const liveEvents = useTaskEvents(taskId ?? "");
 
   const events = useMemo(() => {
     const base = externalEvents ?? liveEvents;

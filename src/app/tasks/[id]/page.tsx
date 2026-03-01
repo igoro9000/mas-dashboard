@@ -25,7 +25,7 @@ export default function TaskDetailPage() {
 }
 
 function TaskDetail({ id }: { id: string }) {
-  const { data: task, isLoading } = useTask(id);
+  const { task, isLoading } = useTask(id);
   const events = useTaskEvents(id);
 
   if (isLoading) {
