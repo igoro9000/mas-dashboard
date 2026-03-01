@@ -3,13 +3,11 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { Send, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SuggestedPrompts } from "@/components/chat/suggested-prompts";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
   onStop: () => void;
   isStreaming: boolean;
-  isEmpty?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
   isKeyboardOpen?: boolean;
@@ -17,7 +15,7 @@ interface ChatInputProps {
 
 export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
   function ChatInput(
-    { onSend, onStop, isStreaming, isEmpty = false, onFocus, onBlur, isKeyboardOpen = false },
+    { onSend, onStop, isStreaming, onFocus, onBlur, isKeyboardOpen = false },
     ref
   ) {
     const [value, setValue] = useState("");
@@ -69,15 +67,8 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
           : internalRef.current;
       if (!el) return;
       el.style.height = "auto";
-      el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+      el.style.height = `${el.scrollHeight}px`;
     };
-
-    const handleSuggestedPrompt = (prompt: string) => {
-      setValue(prompt);
-      handleSend(prompt);
-    };
-
-    const showSuggestions = isEmpty && value.trim() === "";
 
     // Combine refs so both internal and forwarded refs point to the same element
     const setRefs = (el: HTMLTextAreaElement | null) => {
@@ -94,11 +85,6 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
         ? "flex flex-col flex-1 min-h-0 border-t bg-background px-3 py-2"
         : "border-t bg-background px-3 py-2"
       }>
-        {showSuggestions && !isKeyboardOpen && (
-          <div className="max-w-lg mx-auto mb-2">
-            <SuggestedPrompts onSelect={handleSuggestedPrompt} />
-          </div>
-        )}
         <div className={isKeyboardOpen
           ? "flex gap-2 max-w-lg mx-auto flex-1 min-h-0 items-end"
           : "flex items-end gap-2 max-w-lg mx-auto"
@@ -116,7 +102,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             disabled={isStreaming}
             className={isKeyboardOpen
               ? "flex-1 min-h-0 overflow-y-auto resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
-              : "flex-1 resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+              : "flex-1 max-h-[40vh] overflow-y-auto resize-none rounded-xl border bg-muted/50 px-3.5 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
             }
           />
           {isStreaming ? (

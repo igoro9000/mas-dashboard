@@ -112,7 +112,6 @@ export function ChatView() {
           onSend={handleSend}
           onStop={stop}
           isStreaming={isStreaming}
-          isEmpty={isEmpty}
           isKeyboardOpen={hideMessages}
         />
       </div>
