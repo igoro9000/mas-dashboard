@@ -1,5 +1,7 @@
 import useSWR from "swr";
+import { useEffect } from "react";
 import { apiGet } from "@/lib/api";
+import { useSocket } from "@/hooks/use-socket";
 import type { AgentStatus } from "@/types/agent";
 
 const MERGE_ACTION_STATES = ["merging", "merged", "merge_failed"] as const;
@@ -11,6 +13,8 @@ export function isMergeActionState(state: string): state is MergeActionState {
 }
 
 export function useAgentStatus() {
+  const { socket } = useSocket();
+
   const swr = useSWR<AgentStatus[]>(
     "agent-status",
     () => apiGet<AgentStatus[]>("/agents/status"),
@@ -29,6 +33,20 @@ export function useAgentStatus() {
       },
     },
   );
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleAgentStatusUpdate = (updatedStatuses: AgentStatus[]) => {
+      swr.mutate(updatedStatuses, false);
+    };
+
+    socket.on("agent-status", handleAgentStatusUpdate);
+
+    return () => {
+      socket.off("agent-status", handleAgentStatusUpdate);
+    };
+  }, [socket, swr.mutate]);
 
   const reviewAgent = swr.data?.find((agent) => agent.agentType === "review");
 
