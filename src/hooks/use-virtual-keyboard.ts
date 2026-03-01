@@ -1,0 +1,51 @@
+import { useEffect, useState } from "react";
+
+const useVirtualKeyboard = () => {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const updateKeyboardHeight = () => {
+      if (!window.visualViewport) return;
+
+      const viewportHeight = window.visualViewport.height;
+      const windowHeight = window.innerHeight;
+      const height = Math.max(0, windowHeight - viewportHeight);
+
+      setKeyboardHeight(height);
+      setIsKeyboardOpen(height > 0);
+      document.documentElement.style.setProperty(
+        "--keyboard-height",
+        `${height}px`
+      );
+    };
+
+    const handleFocusIn = () => {
+      if (!window.visualViewport) return;
+      setTimeout(updateKeyboardHeight, 100);
+    };
+
+    const handleFocusOut = () => {
+      setKeyboardHeight(0);
+      setIsKeyboardOpen(false);
+      document.documentElement.style.setProperty("--keyboard-height", "0px");
+    };
+
+    document.documentElement.style.setProperty("--keyboard-height", "0px");
+
+    window.visualViewport?.addEventListener("resize", updateKeyboardHeight);
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", updateKeyboardHeight);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+      document.documentElement.style.removeProperty("--keyboard-height");
+    };
+  }, []);
+
+  return { keyboardHeight, isKeyboardOpen };
+};
+
+export default useVirtualKeyboard;
