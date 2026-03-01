@@ -34,7 +34,7 @@ export function ChatView() {
 
   return (
     <div
-      className="fixed inset-x-0 flex flex-col bg-background"
+      className="fixed inset-x-0 flex flex-col bg-background overflow-x-hidden"
       style={{
         top: "calc(env(safe-area-inset-top, 0px) + 3rem)", // safe-area + header h-12
         bottom: isKeyboardOpen

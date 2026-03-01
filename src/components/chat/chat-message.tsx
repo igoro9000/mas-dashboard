@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { User, Bot, Wrench, Clipboard, Check } from "lucide-react";
+import { Wrench, Clipboard, Check } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import type { ChatMessage } from "@/types/chat";
 import { cn } from "@/lib/utils";
@@ -34,18 +34,8 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
   const timestamp = message.timestamp ? new Date(message.timestamp) : null;
 
   return (
-    <div className={cn("flex gap-2 px-3 py-2", isUser ? "flex-row-reverse" : "flex-row")}>
-      {/* Avatar */}
-      <div
-        className={cn(
-          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted"
-        )}
-      >
-        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-      </div>
-
-      <div className={cn("flex flex-col gap-1", isUser ? "max-w-[80%] items-end" : "w-[calc(100%-2.25rem)] items-start")}>
+    <div className={cn("flex flex-col px-3 py-2", isUser ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col gap-1", isUser ? "max-w-[85%] items-end" : "w-full items-start")}>
         {/* Tool call cards rendered above the bubble for assistant messages */}
         {!isUser && hasToolCalls && (
           <div className="flex w-full flex-col gap-1.5">
@@ -113,17 +103,17 @@ export function ChatMessageBubble({ message, isStreaming }: ChatMessageProps) {
               onClick={handleCopy}
               aria-label={copied ? "Copied" : "Copy message"}
               className={cn(
-                "absolute -right-11 top-1/2 -translate-y-1/2",
-                "flex min-h-[44px] min-w-[44px] items-center justify-center",
-                "rounded-lg text-muted-foreground transition-colors",
+                "absolute top-1 right-1",
+                "flex h-7 w-7 items-center justify-center",
+                "rounded-md text-muted-foreground/50 transition-colors",
                 "opacity-0 group-hover:opacity-100 focus:opacity-100",
-                "hover:bg-muted hover:text-foreground"
+                "hover:text-muted-foreground"
               )}
             >
               {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-3.5 w-3.5 text-green-500" />
               ) : (
-                <Clipboard className="h-4 w-4" />
+                <Clipboard className="h-3.5 w-3.5" />
               )}
             </button>
           )}
