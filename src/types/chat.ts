@@ -10,8 +10,11 @@ export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: number;
+  toolCalls?: ToolCall[];
+  createdAt?: string;
+  taskId?: string;
+  agentId?: string;
+  timestamp?: number;
   timestampISO?: string;
   isStreaming?: boolean;
-  toolCalls?: ToolCall[];
 }
