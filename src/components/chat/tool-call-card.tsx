@@ -16,158 +16,9 @@ export function ToolCallCard({ toolName, status, result }: ToolCallCardProps) {
   };
 
   return (
-    <div
-      style={{
-        border: "1px solid #e2e8f0",
-        borderRadius: "8px",
-        overflow: "hidden",
-        marginBottom: "8px",
-        backgroundColor: "#ffffff",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-      }}
-    >
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @keyframes progress-slide {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-
-        .tool-call-spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid #e2e8f0;
-          border-top-color: #6366f1;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          flex-shrink: 0;
-        }
-
-        .tool-call-progress-bar-track {
-          height: 3px;
-          background-color: #e2e8f0;
-          border-radius: 0 0 8px 8px;
-          overflow: hidden;
-        }
-
-        .tool-call-progress-bar-fill {
-          height: 100%;
-          width: 40%;
-          background: linear-gradient(90deg, #6366f1, #818cf8);
-          border-radius: 3px;
-          animation: progress-slide 1.2s ease-in-out infinite;
-        }
-
-        .tool-call-toggle-btn {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-          padding: 12px 14px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          text-align: left;
-          min-height: 44px;
-          min-width: 44px;
-          border-radius: 8px;
-          transition: background-color 0.15s ease;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .tool-call-toggle-btn:hover {
-          background-color: #f8fafc;
-        }
-
-        .tool-call-toggle-btn:focus-visible {
-          outline: 2px solid #6366f1;
-          outline-offset: -2px;
-        }
-
-        .tool-call-toggle-btn:active {
-          background-color: #f1f5f9;
-        }
-
-        .tool-call-chevron {
-          width: 16px;
-          height: 16px;
-          flex-shrink: 0;
-          color: #94a3b8;
-          transition: transform 0.2s ease;
-        }
-
-        .tool-call-chevron.expanded {
-          transform: rotate(180deg);
-        }
-
-        .tool-call-result {
-          padding: 10px 14px 14px 14px;
-          border-top: 1px solid #e2e8f0;
-          background-color: #f8fafc;
-        }
-
-        .tool-call-result pre {
-          margin: 0;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-          font-size: 12px;
-          line-height: 1.6;
-          color: #334155;
-          white-space: pre-wrap;
-          word-break: break-word;
-          overflow-wrap: break-word;
-        }
-
-        .tool-call-result-label {
-          font-size: 11px;
-          font-weight: 600;
-          color: #94a3b8;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin-bottom: 6px;
-        }
-
-        .tool-call-name {
-          font-size: 13px;
-          font-weight: 600;
-          color: #334155;
-          flex: 1;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .tool-call-status-badge {
-          font-size: 11px;
-          font-weight: 500;
-          padding: 2px 8px;
-          border-radius: 9999px;
-          flex-shrink: 0;
-        }
-
-        .tool-call-status-badge.pending {
-          background-color: #ede9fe;
-          color: #6d28d9;
-        }
-
-        .tool-call-status-badge.complete {
-          background-color: #dcfce7;
-          color: #15803d;
-        }
-
-        .tool-call-checkmark {
-          width: 16px;
-          height: 16px;
-          flex-shrink: 0;
-          color: #22c55e;
-        }
-      `}</style>
-
+    <div className="border border-border rounded-lg overflow-hidden mb-2 bg-background shadow-sm">
       <button
-        className="tool-call-toggle-btn"
+        className="tool-call-toggle-btn flex items-center gap-2.5 w-full px-3.5 py-3 bg-transparent border-none cursor-pointer text-left min-h-[44px] rounded-lg transition-colors duration-150 hover:bg-muted focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-[-2px] active:bg-muted/80 [-webkit-tap-highlight-color:transparent]"
         onClick={handleToggle}
         aria-expanded={status === "complete" ? isExpanded : undefined}
         aria-label={
@@ -179,10 +30,13 @@ export function ToolCallCard({ toolName, status, result }: ToolCallCardProps) {
         style={{ cursor: status === "pending" ? "default" : "pointer" }}
       >
         {status === "pending" ? (
-          <span className="tool-call-spinner" aria-hidden="true" />
+          <span
+            className="w-4 h-4 border-2 border-border border-t-primary rounded-full animate-spin flex-shrink-0"
+            aria-hidden="true"
+          />
         ) : (
           <svg
-            className="tool-call-checkmark"
+            className="w-4 h-4 flex-shrink-0 text-green-500"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -196,12 +50,19 @@ export function ToolCallCard({ toolName, status, result }: ToolCallCardProps) {
           </svg>
         )}
 
-        <span className="tool-call-name" title={toolName}>
+        <span
+          className="text-[13px] font-semibold text-foreground flex-1 whitespace-nowrap overflow-hidden text-ellipsis"
+          title={toolName}
+        >
           {toolName}
         </span>
 
         <span
-          className={`tool-call-status-badge ${status}`}
+          className={`text-[11px] font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
+            status === "pending"
+              ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
+              : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+          }`}
           aria-hidden="true"
         >
           {status === "pending" ? "Running" : "Done"}
@@ -209,7 +70,7 @@ export function ToolCallCard({ toolName, status, result }: ToolCallCardProps) {
 
         {status === "complete" && (
           <svg
-            className={`tool-call-chevron${isExpanded ? " expanded" : ""}`}
+            className={`w-4 h-4 flex-shrink-0 text-muted-foreground transition-transform duration-200${isExpanded ? " rotate-180" : ""}`}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -225,15 +86,26 @@ export function ToolCallCard({ toolName, status, result }: ToolCallCardProps) {
       </button>
 
       {status === "pending" && (
-        <div className="tool-call-progress-bar-track" aria-hidden="true">
-          <div className="tool-call-progress-bar-fill" />
+        <div
+          className="h-[3px] bg-border rounded-b-lg overflow-hidden"
+          aria-hidden="true"
+        >
+          <div className="tool-call-progress-bar-fill h-full w-[40%] bg-gradient-to-r from-primary to-primary/60 rounded-[3px]" />
         </div>
       )}
 
       {status === "complete" && isExpanded && (
-        <div className="tool-call-result" role="region" aria-label={`Result for ${toolName}`}>
-          <div className="tool-call-result-label">Result</div>
-          <pre>{result ?? "No result returned."}</pre>
+        <div
+          className="px-3.5 pb-3.5 pt-2.5 border-t border-border bg-muted/50"
+          role="region"
+          aria-label={`Result for ${toolName}`}
+        >
+          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+            Result
+          </div>
+          <pre className="m-0 font-mono text-xs leading-relaxed text-foreground whitespace-pre-wrap break-words overflow-wrap-anywhere">
+            {result ?? "No result returned."}
+          </pre>
         </div>
       )}
     </div>
