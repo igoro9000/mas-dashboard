@@ -19,6 +19,7 @@ export function ChatView() {
     newSession,
     switchSession,
     deleteSession,
+    deleteAllSessions,
     activeSessionId,
   } = useChat();
   const sessions = useChatStore((s) => s.sessions);
@@ -67,7 +68,8 @@ export function ChatView() {
   const lastMessage = messages[messages.length - 1];
   const isLastMessageFromAssistant = lastMessage?.role === "assistant";
   const activeSession = sessions.find((s) => s.id === activeSessionId);
-  const canAddSession = sessions.length < MAX_SESSIONS;
+  const currentIsEmpty = messages.length === 0;
+  const canAddSession = !currentIsEmpty && sessions.length < MAX_SESSIONS;
 
   return (
     <div
@@ -122,6 +124,17 @@ export function ChatView() {
                     </button>
                   ))
                 )}
+                {sessions.length > 0 && (
+                  <button
+                    className="w-full text-left px-3 py-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10 border-t border-border/40 transition-colors"
+                    onClick={() => {
+                      setShowSessions(false);
+                      deleteAllSessions();
+                    }}
+                  >
+                    Alle löschen
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -133,7 +146,13 @@ export function ChatView() {
             className="h-7 text-xs text-muted-foreground px-2"
             onClick={newSession}
             disabled={!canAddSession}
-            title={canAddSession ? "Neuen Chat erstellen" : `Maximal ${MAX_SESSIONS} Chats`}
+            title={
+              currentIsEmpty
+                ? "Sende erst eine Nachricht bevor du einen neuen Chat öffnest"
+                : sessions.length >= MAX_SESSIONS
+                ? `Maximal ${MAX_SESSIONS} Chats`
+                : "Neuen Chat erstellen"
+            }
           >
             <Plus className="h-3.5 w-3.5" />
           </Button>
