@@ -3,7 +3,7 @@
 import { useRef, useCallback, useEffect } from "react";
 import type { ChatMessage, ChatSession } from "@/types/chat";
 import { supabase } from "@/lib/supabase";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { useChatStore } from "@/stores/chat-store";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
@@ -87,6 +87,16 @@ export function useChat() {
       await fetchMessages(sessionId);
     }
   }, [fetchMessages]);
+
+  const deleteSession = useCallback(async (sessionId: string) => {
+    // Optimistically remove from store first (removeSession auto-switches to next)
+    useChatStore.getState().removeSession(sessionId);
+    try {
+      await apiDelete(`/chat/sessions/${sessionId}`);
+    } catch {
+      // silently ignore — local state already updated
+    }
+  }, []);
 
   // On mount: init sessions
   useEffect(() => {
@@ -257,6 +267,7 @@ export function useChat() {
     fetchMessages,
     newSession,
     switchSession,
+    deleteSession,
     activeSessionId,
   };
 }
