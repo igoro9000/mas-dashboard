@@ -8,8 +8,11 @@ import { useChatStore } from "@/stores/chat-store";
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 const WS_BASE = process.env.NEXT_PUBLIC_WS_BASE_URL ?? BASE.replace(/^http/, "ws");
 
+// The current API has no session concept; all messages live under this key.
+const SESSION_ID = "default";
+
 export function useChat() {
-  const messages = useChatStore((s) => s.messages);
+  const messages = useChatStore((s) => s.messages[SESSION_ID] ?? []);
   const isStreaming = useChatStore((s) => s.isStreaming);
   const abortRef = useRef<AbortController | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -56,13 +59,13 @@ export function useChat() {
         switch (payload.type) {
           case "chat:new":
             if (payload.message) {
-              useChatStore.getState().addMessage(payload.message);
+              useChatStore.getState().addMessage(SESSION_ID, payload.message);
             }
             break;
 
           case "chat:update":
             if (payload.messageId) {
-              useChatStore.getState().updateMessage(payload.messageId, {
+              useChatStore.getState().updateMessage(SESSION_ID, payload.messageId, {
                 content: payload.content ?? "",
               });
             }
@@ -70,7 +73,7 @@ export function useChat() {
 
           case "chat:delete":
             if (payload.messageId) {
-              useChatStore.getState().removeMessage(payload.messageId);
+              useChatStore.getState().removeMessage(SESSION_ID, payload.messageId);
             }
             break;
 

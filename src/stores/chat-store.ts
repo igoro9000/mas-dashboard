@@ -25,6 +25,7 @@ interface ChatStore {
   setMessages: (sessionId: string, messages: ChatMessage[]) => void;
   addMessage: (sessionId: string, message: ChatMessage) => void;
   updateMessage: (sessionId: string, id: string, patch: Partial<ChatMessage>) => void;
+  removeMessage: (sessionId: string, id: string) => void;
   appendToMessage: (sessionId: string, id: string, delta: string) => void;
   addToolCall: (sessionId: string, id: string, tool: ToolCall) => void;
   clearMessages: (sessionId: string) => void;
@@ -86,6 +87,14 @@ export const useChatStore = create<ChatStore>()(
             [sessionId]: (s.messages[sessionId] ?? []).map((m) =>
               m.id === id ? { ...m, ...patch } : m
             ),
+          },
+        })),
+
+      removeMessage: (sessionId, id) =>
+        set((s) => ({
+          messages: {
+            ...s.messages,
+            [sessionId]: (s.messages[sessionId] ?? []).filter((m) => m.id !== id),
           },
         })),
 
