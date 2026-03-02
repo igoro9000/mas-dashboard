@@ -122,7 +122,7 @@ export function useChat() {
       });
       if (!res.ok) return;
       const data: ChatMessage[] = await res.json();
-      if (mountedRef.current) useChatStore.getState().setMessages(data);
+      if (mountedRef.current) useChatStore.getState().setMessages(SESSION_ID, data);
     } catch {
       // network errors are silently ignored; socket will keep state in sync
     }
@@ -156,15 +156,15 @@ export function useChat() {
 
       // Build history before adding new messages (no stale closure — reads from store)
       const history = [
-        ...useChatStore.getState().messages,
+        ...(useChatStore.getState().messages[SESSION_ID] ?? []),
         userMsg,
       ].map((m) => ({
         role: m.role,
         content: m.content,
       }));
 
-      useChatStore.getState().addMessage(userMsg);
-      useChatStore.getState().addMessage(assistantMsg);
+      useChatStore.getState().addMessage(SESSION_ID, userMsg);
+      useChatStore.getState().addMessage(SESSION_ID, assistantMsg);
       useChatStore.getState().setIsStreaming(true);
 
       const token = await getToken();
@@ -187,7 +187,7 @@ export function useChat() {
           const body = await res.text();
           useChatStore
             .getState()
-            .updateMessage(assistantId, {
+            .updateMessage(SESSION_ID, assistantId, {
               content: `Error: ${res.status} — ${body}`,
             });
           useChatStore.getState().setIsStreaming(false);
@@ -220,15 +220,15 @@ export function useChat() {
               try {
                 const data = JSON.parse(dataStr);
                 if (eventType === "delta" && data.text) {
-                  useChatStore.getState().appendToMessage(assistantId, data.text);
+                  useChatStore.getState().appendToMessage(SESSION_ID, assistantId, data.text);
                 } else if (eventType === "tool_use" && data.tool) {
-                  useChatStore.getState().addToolCall(assistantId, data.tool);
+                  useChatStore.getState().addToolCall(SESSION_ID, assistantId, data.tool);
                 } else if (eventType === "message_id" && data.id) {
-                  useChatStore.getState().updateMessage(assistantId, { id: data.id });
+                  useChatStore.getState().updateMessage(SESSION_ID, assistantId, { id: data.id });
                 } else if (eventType === "error") {
-                  useChatStore.getState().updateMessage(assistantId, {
+                  useChatStore.getState().updateMessage(SESSION_ID, assistantId, {
                     content:
-                      useChatStore.getState().messages.find((m) => m.id === assistantId)
+                      (useChatStore.getState().messages[SESSION_ID] ?? []).find((m) => m.id === assistantId)
                         ?.content + `\n\nError: ${data.error ?? "unknown"}`,
                   });
                 }
@@ -243,7 +243,7 @@ export function useChat() {
         if ((err as Error).name !== "AbortError") {
           useChatStore
             .getState()
-            .updateMessage(assistantId, {
+            .updateMessage(SESSION_ID, assistantId, {
               content: `Error: ${(err as Error).message}`,
             });
         }
@@ -265,7 +265,7 @@ export function useChat() {
 
   const clear = useCallback(() => {
     abortRef.current?.abort();
-    useChatStore.getState().clearMessages();
+    useChatStore.getState().clearMessages(SESSION_ID);
     useChatStore.getState().setIsStreaming(false);
   }, []);
 
