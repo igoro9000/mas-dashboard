@@ -18,3 +18,10 @@ export interface ChatMessage {
   timestampISO?: string;
   isStreaming?: boolean;
 }
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
