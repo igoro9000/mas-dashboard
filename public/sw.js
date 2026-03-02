@@ -1,5 +1,3 @@
-const VERSION = "v3";
-
 self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (event) => {
