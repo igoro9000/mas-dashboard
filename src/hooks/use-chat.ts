@@ -8,10 +8,15 @@ import { useChatStore } from "@/stores/chat-store";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
+// Stable empty array — reusing the same reference prevents Zustand's Object.is
+// comparison from returning a new [] on every render (which would cause an
+// infinite re-render loop: new [] !== old [], triggers update, repeat).
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
 export function useChat() {
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const messages = useChatStore((s) =>
-    activeSessionId ? (s.messages[activeSessionId] ?? []) : []
+    (activeSessionId ? s.messages[activeSessionId] : null) ?? EMPTY_MESSAGES
   );
   const isStreaming = useChatStore((s) => s.isStreaming);
   const abortRef = useRef<AbortController | null>(null);
@@ -190,8 +195,13 @@ export function useChat() {
               const data = JSON.parse(dataStr) as Record<string, unknown>;
               if (eventType === "delta" && typeof data.text === "string") {
                 useChatStore.getState().appendToMessage(sessionId, assistantId, data.text);
-              } else if (eventType === "tool_use" && data.tool) {
-                useChatStore.getState().addToolCall(sessionId, assistantId, data.tool as never);
+              } else if (eventType === "tool_use" && typeof data.tool === "string") {
+                useChatStore.getState().addToolCall(sessionId, assistantId, {
+                  id: crypto.randomUUID(),
+                  name: data.tool,
+                  arguments: {},
+                  status: "pending",
+                });
               } else if (eventType === "message_id" && typeof data.id === "string") {
                 useChatStore.getState().updateMessage(sessionId, assistantId, { id: data.id });
               } else if (eventType === "error") {
