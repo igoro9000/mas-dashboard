@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { MessageSquare, Trash2 } from "lucide-react";
+import { MessageSquare, Trash2, Plus, ChevronDown } from "lucide-react";
 import { useChat } from "@/hooks/use-chat";
+import { useChatStore } from "@/stores/chat-store";
 import { useVirtualKeyboard } from "@/hooks/use-virtual-keyboard";
 import { ChatMessageBubble } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { Button } from "@/components/ui/button";
 
 export function ChatView() {
-  const { messages, isStreaming, send, stop, clear } = useChat();
+  const { messages, isStreaming, send, stop, clear, newSession, switchSession, activeSessionId } =
+    useChat();
+  const sessions = useChatStore((s) => s.sessions);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastMessageRef = useRef<HTMLDivElement>(null);
@@ -44,6 +47,7 @@ export function ChatView() {
   const isEmpty = messages.length === 0;
   const lastMessage = messages[messages.length - 1];
   const isLastMessageFromAssistant = lastMessage?.role === "assistant";
+  const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   return (
     <div
@@ -55,18 +59,53 @@ export function ChatView() {
           : "calc(env(safe-area-inset-bottom, 0px) + 3.5rem)", // normal: above bottom nav (h-14)
       }}
     >
-      {/* Clear button — hidden when keyboard is open */}
-      {messages.length > 0 && !hideMessages && (
-        <div className="flex justify-end px-3 py-1 shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs text-muted-foreground"
-            onClick={clear}
-          >
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
-            Clear
-          </Button>
+      {/* Session toolbar — hidden when keyboard is open */}
+      {!hideMessages && (
+        <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-border/40">
+          {/* Session switcher (compact dropdown when multiple sessions exist) */}
+          {sessions.length > 1 ? (
+            <div className="relative">
+              <select
+                className="appearance-none bg-transparent text-xs text-muted-foreground pr-5 pl-1 py-0.5 rounded cursor-pointer focus:outline-none max-w-[160px] truncate"
+                value={activeSessionId ?? ""}
+                onChange={(e) => switchSession(e.target.value)}
+              >
+                {sessions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-0 top-0.5 h-3.5 w-3.5 text-muted-foreground" />
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground truncate max-w-[160px]">
+              {activeSession?.title ?? "New Chat"}
+            </span>
+          )}
+
+          <div className="flex items-center gap-1">
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs text-muted-foreground"
+                onClick={clear}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Clear
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground"
+              onClick={newSession}
+              title="New Chat"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       )}
 
