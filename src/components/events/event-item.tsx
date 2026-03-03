@@ -10,8 +10,10 @@ const agentConfig: Record<AgentName, { icon: typeof Bot; color: string }> = {
   reviewer: { icon: Search, color: "text-amber-500" },
 };
 
+const fallbackConfig = { icon: Bot, color: "text-muted-foreground" };
+
 export function EventItem({ event }: { event: AgentEvent }) {
-  const { icon: Icon, color } = agentConfig[event.agent];
+  const { icon: Icon, color } = agentConfig[event.agent] ?? fallbackConfig;
 
   return (
     <div className="flex gap-3 py-2">
