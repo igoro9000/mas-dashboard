@@ -10,8 +10,12 @@ const agentConfig: Record<AgentName, { icon: typeof Bot; color: string }> = {
   reviewer: { icon: Search, color: "text-amber-500" },
 };
 
+const defaultConfig = { icon: Bot, color: "text-muted-foreground" };
+
 export function EventItem({ event }: { event: AgentEvent }) {
-  const { icon: Icon, color } = agentConfig[event.agent];
+  const config = agentConfig[event.agent] ?? defaultConfig;
+  const Icon = config.icon;
+  const color = config.color;
 
   return (
     <div className="flex gap-3 py-2">
@@ -21,10 +25,10 @@ export function EventItem({ event }: { event: AgentEvent }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className={cn("text-xs font-semibold capitalize", color)}>
-            {event.agent}
+            {event.agent ?? "agent"}
           </span>
           <span className="text-[10px] text-muted-foreground">
-            {relativeTime(event.timestamp)}
+            {event.timestamp ? relativeTime(event.timestamp) : ""}
           </span>
         </div>
         <p className="text-sm text-foreground/90 break-words">{event.message}</p>
